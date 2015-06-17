@@ -1,4 +1,4 @@
-# hexo-generator-api
+# hexo-generator-api-alt
 
 Generate complete static json api for your hexo site
 
@@ -13,5 +13,5 @@ Generate complete static json api for your hexo site
 ## Installation
 
 ```
-$ npm install hexo-generator-api --save
+$ npm install hexo-generator-api-alt --save
 ```
