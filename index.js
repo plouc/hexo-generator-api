@@ -75,9 +75,7 @@ hexo.extend.generator.register('api', function (locals) {
             data: JSON.stringify(postData, null, '    ')
         });
 
-        _.forOwn(menuConfig, function(label, itemConfig) {
-            console.log(itemConfig);
-        });
+        postsData.push(postData);
     });
 
     apiEntries.push({
@@ -140,7 +138,6 @@ hexo.extend.generator.register('api', function (locals) {
         menuData.tags.push(tagData);
     });
 
-    console.log(menuConfig);
     _.forOwn(menuConfig, function (itemConfig, label) {
         switch (itemConfig.type) {
             case 'category':
@@ -164,6 +161,14 @@ hexo.extend.generator.register('api', function (locals) {
                     label: label,
                     type:  itemConfig.type,
                     slug:  tag.slug
+                });
+                break;
+
+            case 'external':
+                menuData.navigation.push({
+                    label: label,
+                    type:  itemConfig.type,
+                    url:   itemConfig.url
                 });
                 break;
         }
