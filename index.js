@@ -54,6 +54,7 @@ hexo.extend.generator.register('api', function (locals) {
         var postData = {
             slug:       post.slug,
             title:      post.title,
+            date:       post.date.format('MMM D YYYY'),
             markdown:   post._content,
             categories: post.categories.map(function (category) {
                 return {
