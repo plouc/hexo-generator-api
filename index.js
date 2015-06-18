@@ -48,6 +48,7 @@ hexo.extend.generator.register('api', function (locals) {
         navigation: []
     };
 
+
     var posts = locals.posts.sort('-date');
     posts.forEach(function (post) {
         var postData = {
@@ -86,17 +87,23 @@ hexo.extend.generator.register('api', function (locals) {
 
     var pages = locals.pages.sort('+name');
     pages.forEach(function (page) {
-        console.log(page.permalink);
+        // http://me.com/Resume/Pro/index.html -> Resume/Pro
+        var pageSlug = page.permalink.slice(config.url.length + 1, -11);
+
         var pageData = {
-            slug:     page.slug,
+            slug:     pageSlug,
             title:    page.title,
-            markdown: page._content
+            markdown: page._content,
+            comment:  page.comment,
+            share:    page.share
         };
 
         apiEntries.push({
-            path: 'api/pages/' + page.slug + '.json',
+            path: 'api/pages/' + pageSlug + '.json',
             data: JSON.stringify(pageData)
-        })
+        });
+
+        pagesData.push(pageData);
     });
 
 
@@ -119,6 +126,7 @@ hexo.extend.generator.register('api', function (locals) {
         menuData.categories.push(categoryData);
     });
 
+
     var tags = locals.tags.sort('+name');
     tags.forEach(function (tag) {
         var tagData = {
@@ -138,40 +146,38 @@ hexo.extend.generator.register('api', function (locals) {
         menuData.tags.push(tagData);
     });
 
+
     _.forOwn(menuConfig, function (itemConfig, label) {
+        var collection;
+
         switch (itemConfig.type) {
-            case 'category':
-                var category = _.find(categoriesData, { slug: itemConfig.slug });
-                if (category === undefined) {
-                    throw new Error('Unable to find category ' + JSON.stringify(itemConfig));
-                }
-                menuData.navigation.push({
-                    label: label,
-                    type:  itemConfig.type,
-                    slug:  category.slug
-                });
-                break;
-
-            case 'tag':
-                var tag = _.find(tagsData, { slug: itemConfig.slug });
-                if (tag === undefined) {
-                    throw new Error('Unable to find tag ' + JSON.stringify(itemConfig));
-                }
-                menuData.navigation.push({
-                    label: label,
-                    type:  itemConfig.type,
-                    slug:  tag.slug
-                });
-                break;
-
             case 'external':
                 menuData.navigation.push({
                     label: label,
                     type:  itemConfig.type,
                     url:   itemConfig.url
                 });
+                return;
+
+            case 'category': collection = categoriesData; break;
+            case 'tag':      collection = tagsData;       break;
+            case 'page':     collection = pagesData;      break;
+
+            default:
+                throw new Error('Invalid menu item type "' + itemConfig.type +  '"');
                 break;
         }
+
+        var item = _.find(collection, { slug: itemConfig.slug });
+        if (item === undefined) {
+            throw new Error('Unable to find menu item "' + itemConfig.type +  '" ' + JSON.stringify(itemConfig));
+        }
+
+        menuData.navigation.push({
+            label: label,
+            type:  itemConfig.type,
+            slug:  itemConfig.slug
+        });
     });
 
     apiEntries.push({
